@@ -3,6 +3,7 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 import io
+import tempfile
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
@@ -20,11 +21,22 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def get_pdf_text(pdf_docs):
     text=""
-    # We Read the pages the extract the text from each pages of the pdf
-    for pdf in pdf_docs:
-        pdf_reader=PdfReader(io.BytesIO(pdf.read()))
-        for page in pdf_reader.pages:
-            text+=page.extract_text()
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        temp_file.write(pdf_docs.read())
+        temp_file_path= temp_file.name
+
+    # Read the pages
+    pdf_reader= PdfReader(temp_file_path)
+    for page in pdf_reader.pages:
+        text+= page.extract_text()
+
+    # # We Read the pages the extract the text from each pages of the pdf
+    # for pdf in pdf_docs:
+    #     pdf_reader=PdfReader(io.BytesIO(pdf.read()))
+    #     for page in pdf_reader.pages:
+    #         text+=page.extract_text()
+    os.remove(temp_file_path)
     return text
 
 def get_chunks(text):
@@ -34,7 +46,7 @@ def get_chunks(text):
 
 def get_vector_store(text_chunks):
     embeddings= GoogleGenerativeAIEmbeddings(model="models/embeddings-001")
-    vector_store= FAISS.from_texts(text_chunks, embeddings=embeddings)
+    vector_store= FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local("faiss_index")
 
 
