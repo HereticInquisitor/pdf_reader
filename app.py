@@ -2,6 +2,7 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
+import io
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
@@ -21,7 +22,7 @@ def get_pdf_text(pdf_docs):
     text=""
     # We Read the pages the extract the text from each pages of the pdf
     for pdf in pdf_docs:
-        pdf_reader=PdfReader(pdf)
+        pdf_reader=PdfReader(io.BytesIO(pdf.read()))
         for page in pdf_reader.pages:
             text+=page.extract_text()
     return text
