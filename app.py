@@ -69,7 +69,7 @@ def get_vector_store(text_chunks):
 
 
 def get_conversational_chain():
-    PromptTemplate="""
+    prompt_template_str="""
     Answer the question as detailed as possible from the provided context, make sure to provide all the details,
     if the details is not provided in the provided context just say, "answer is not available in the context",
     don't provide wrong answers\n\n
@@ -82,7 +82,7 @@ def get_conversational_chain():
 
     model=ChatGoogleGenerativeAI(model="gemini-pro",temperature=0.3)
 
-    prompt=PromptTemplate(template=PromptTemplate, input_variables=["context","question"])
+    prompt=PromptTemplate(template=prompt_template_str, input_variables=["context","question"])
     chain=load_qa_chain(model, chain_type="stuff",prompt=prompt)
     return chain
 
